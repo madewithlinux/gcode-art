@@ -37,7 +37,7 @@ class Turtle:
 		# self.dir = 0
 		# self.dirs = [(1,0), (0,1), (-1,0), (0,-1)]
 	def turn(self, theta):
-		self.theta = fmod(theta + self.theta, 2*pi)
+		self.theta = fmod(theta*pi/180 + self.theta, 2*pi)
 	def move(self, dist):
 		self.x += dist*cos(self.theta)
 		self.y += dist*sin(self.theta)
