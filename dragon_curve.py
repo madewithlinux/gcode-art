@@ -17,5 +17,15 @@ def dragonCurveRecursive(order, length, sign):
     t.turn(sign * -90)
     dragonCurveRecursive(order - 1, length * rootHalf, -1)
 
+t.move_to(-100,0)
+t.set_angle(0)
+dragonCurve(4, 200)
+t.move_to(-100,0)
+t.set_angle(0)
+dragonCurve(5, 200)
+t.move_to(-100,0)
+t.set_angle(0)
 dragonCurve(6, 200)
+t.move_to(0,0)
+t.set_angle(0)
 
