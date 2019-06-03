@@ -5,7 +5,7 @@ from math import sin, cos, pi, sqrt, fmod
 
 
 # all distances in mm!
-r = 260
+width = 500
 n_segments = 1600
 top_clip_distance = 870
 wire_length = 650
@@ -32,13 +32,33 @@ def move_to(x,y):
 
 move_to(0, 0)
 
-k = 4/3.0
-max_theta = 6*pi
-for i in range(0,n_segments+1):
-	theta = max_theta*i/n_segments
-	theta += pi
-	x = r*cos(k*theta)*cos(theta)
-	y = r*cos(k*theta)*sin(theta)
-	move_to(x, y)
+points = []
+xmax = 0
+ymax = 0
+import csv
+with open('/home/j0sh/Documents/code/tsp-art/code/points.csv') as csvfile:
+    readCSV = csv.reader(csvfile, delimiter=',')
+    for row in readCSV:
+    	x = float(row[0])
+    	y = float(row[1])
+    	points.append((x,y))
+    	xmax = max(xmax, x)
+    	ymax = max(ymax, y)
+
+def move_to_normalized(x,y):
+	x /= xmax
+	x -= 0.5
+	x *= width
+
+	y = ymax - y
+	y /= ymax
+	y -= 0.5
+	y *= width
+	
+	move_to(x,y)
+
+for x,y in points:
+	move_to_normalized(x,y)
+
 
 move_to(0, 0)
