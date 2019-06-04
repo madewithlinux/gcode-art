@@ -4,7 +4,6 @@ from gcode import Turtle, PolargraphKinematics
 
 t = Turtle(
     PolargraphKinematics(
-        n_segments=200,
         top_clip_distance=870,
         wire_length=630,
         max_feedrate=600,

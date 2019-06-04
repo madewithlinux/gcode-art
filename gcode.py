@@ -42,11 +42,9 @@ class CartesianKinematics(Kinematics):
 class PolargraphKinematics(Kinematics):
     def __init__(self,
                  *,
-                 n_segments: int,
                  top_clip_distance: int,
                  wire_length: int,
                  max_feedrate: int):
-        self.n_segments = n_segments
         self.top_clip_distance = top_clip_distance
         self.wire_length = wire_length
         self.max_feedrate = max_feedrate
