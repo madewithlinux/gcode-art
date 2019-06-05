@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 
 from math import sin, cos, pi, sqrt, fmod
-from gcode import PolargraphKinematics
+from gcode import PolargraphKinematics, CartesianKinematics
+from image_kinematics import ImageKinematics
 
 r = 260
 n_segments = 1600
-kinematics = PolargraphKinematics(
-    top_clip_distance=870,
-    wire_length=650,
-    max_feedrate=750,
-)
+kinematics = ImageKinematics(
+    PolargraphKinematics(
+        top_clip_distance=870,
+        wire_length=650,
+        max_feedrate=750,
+    ),
+    1080, 2 * r)
 
 kinematics.move(0, 0)
 
@@ -24,4 +27,5 @@ for i in range(0, n_segments + 1):
 
 kinematics.move(0, 0)
 
-kinematics.print_gcode()
+# kinematics.print_gcode()
+kinematics.to_file("rose.g")
