@@ -11,6 +11,9 @@ class ImageKinematics(CartesianKinematics):
         super(ImageKinematics, self).__init__()
         self.size = size
         self.position = (0, 0)
+        self.linewidth = 2  # mm
+        self.border = 50
+        self.pixels_per_mm = 4
         self.lines = []
 
     def move(self, x, y):
@@ -21,7 +24,7 @@ class ImageKinematics(CartesianKinematics):
     def point_to_image_coordinates(self, p):
         x, y = p
         # TODO transform point
-        return x,y
+        return x, y
 
     def to_file(self, filename):
         super(ImageKinematics, self).to_file(filename)
@@ -32,5 +35,5 @@ class ImageKinematics(CartesianKinematics):
         for p0, p1 in self.lines:
             p0 = self.point_to_image_coordinates(p0)
             p1 = self.point_to_image_coordinates(p1)
-            draw.line([p0, p1], fill=(127, 127, 127), width=4)
+            draw.line([p0, p1], fill=(127, 127, 127), width=self.linewidth * self.pixels_per_mm)
         im.save(filename)
