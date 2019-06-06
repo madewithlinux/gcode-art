@@ -65,6 +65,7 @@ class PolargraphKinematics(Kinematics):
         return self._gcode
 
     def move(self, x, y):
+        # TODO split long moves!
         a = self.wire_length - dist(self.anchor_A_x, self.anchor_A_y, x, y)
         b = self.wire_length - dist(self.anchor_B_x, self.anchor_B_y, x, y)
         self._gcode.append(f"G1 X{a} Y{b}")
