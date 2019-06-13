@@ -85,7 +85,7 @@ for yi in range(n_lines):
         kinematics.move(x, y + y_offset)
     # move around the border to the next line
     x, y = image_to_gcode_coordinates(image_width, yi)
-    kinematics.move(r, y)  # A on current line
+    kinematics.move(r, y - line_height/2)  # A on current line
     kinematics.move(r, r)  # B
     kinematics.move(-r, r)  # C
     kinematics.move(*image_to_gcode_coordinates(0, yi + 1))  # C on next line
