@@ -22,7 +22,7 @@ kinematics = ImageKinematics(
     1080, 2 * r)
 
 ####
-n_lines = int(2 * r / line_height)
+n_lines = 2 * int(2 * r / line_height)
 n_segments = int(2 * r / line_segment_length)
 
 # draw a bounding box
@@ -52,7 +52,6 @@ image_width, image_height = im.size
 im.save('test.png')
 
 
-
 def image_to_gcode_coordinates(xi: int, yi: int):
     x = float(xi)
     y = float(yi)
@@ -72,9 +71,10 @@ def image_to_gcode_coordinates(xi: int, yi: int):
 print('n_segments', n_segments)
 print('n_lines', n_lines)
 
-for yi in range(n_lines):
+for yi in range(0, n_lines, 2):
     for xi in range(n_segments):
-        scaled_pixel = 1 - im.getpixel((xi, yi)) / 255.0
+        image_y_offset = int(xi % 2 == 1)
+        scaled_pixel = 1 - im.getpixel((xi, yi + image_y_offset)) / 255.0
         x, y = image_to_gcode_coordinates(xi, yi)
         y -= line_height / 2
 
@@ -85,7 +85,7 @@ for yi in range(n_lines):
         kinematics.move(x, y + y_offset)
     # move around the border to the next line
     x, y = image_to_gcode_coordinates(image_width, yi)
-    kinematics.move(r, y - line_height/2)  # A on current line
+    kinematics.move(r, y - line_height / 2)  # A on current line
     kinematics.move(r, r)  # B
     kinematics.move(-r, r)  # C
     kinematics.move(*image_to_gcode_coordinates(0, yi + 1))  # C on next line
