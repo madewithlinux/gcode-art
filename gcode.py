@@ -3,6 +3,8 @@
 from math import sin, cos, pi, sqrt, fmod
 from abc import abstractmethod, ABCMeta
 
+import numpy as np
+
 
 def dist(x1, y1, x2, y2):
     return sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
@@ -10,12 +12,12 @@ def dist(x1, y1, x2, y2):
 
 class Kinematics(metaclass=ABCMeta):
     @abstractmethod
-    def move(self, x, y):
+    def move(self, x: float, y: float):
         pass
 
     @property
     @abstractmethod
-    def gcode(self):
+    def gcode(self) -> [str]:
         pass
 
     def to_file(self, filename):
@@ -54,6 +56,9 @@ class PolargraphKinematics(Kinematics):
         self.anchor_A_y = sqrt(wire_length ** 2 - (top_clip_distance / 2) ** 2)
         self.anchor_B_y = self.anchor_A_y
 
+        self.current_position = (0, 0)
+        self.split_threshold = 5  # mm
+
         self._gcode = [
             "G28.3 ; set current position to 0,0",
             "G90   ; absolute mode",
@@ -64,11 +69,26 @@ class PolargraphKinematics(Kinematics):
     def gcode(self):
         return self._gcode
 
-    def move(self, x, y):
+    def _move_internal(self, x, y):
         # TODO split long moves!
         a = self.wire_length - dist(self.anchor_A_x, self.anchor_A_y, x, y)
         b = self.wire_length - dist(self.anchor_B_x, self.anchor_B_y, x, y)
         self._gcode.append(f"G1 X{a} Y{b}")
+
+    def move(self, x, y):
+        # plan out a spaced out list of points along our route to visit
+        line_length = dist(x, y, self.current_position[0], self.current_position[1])
+        num_splits = int(line_length // self.split_threshold)
+
+        xs = np.linspace(self.current_position[0], x, num_splits, endpoint=False)
+        ys = np.linspace(self.current_position[1], y, num_splits, endpoint=False)
+
+        for x1, y1 in zip(xs, ys):
+            self._move_internal(x1, y1)
+
+        # finally, explicitly move to where we were told to go
+        self._move_internal(x, y)
+        self.current_position = (x, y)
 
 
 class Turtle:

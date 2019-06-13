@@ -8,10 +8,10 @@ from image_kinematics import ImageKinematics
 
 # TODO support non-square images to preserve aspect ratio
 
-# r = 260
-line_height = 16  # mm
-r = line_height * 15.5
+r = 390
+pixel_size = 20
 line_segment_length = 3  # mm
+marker_width = 2
 
 kinematics = ImageKinematics(
     PolargraphKinematics(
@@ -19,11 +19,11 @@ kinematics = ImageKinematics(
         wire_length=650,
         max_feedrate=750,
     ),
-    1080, 2 * r)
+    4096, 2 * r)
 
 ####
-n_lines = int(2 * r / line_height)
-n_segments = int(2 * r / line_segment_length)
+n_pixels = int(2 * r / pixel_size)
+max_pixel_lines = pixel_size / marker_width - 1
 
 # draw a bounding box
 # C-------B
@@ -46,11 +46,10 @@ im: Image = Image.open(filename)
 print('image size: ' + str(im.size))
 
 im = im.convert('L')
-im = im.resize((n_segments, n_lines))
+im = im.resize((n_pixels, n_pixels))
 im = ImageOps.autocontrast(im)
 image_width, image_height = im.size
 im.save('test.png')
-
 
 
 def image_to_gcode_coordinates(xi: int, yi: int):
@@ -69,20 +68,31 @@ def image_to_gcode_coordinates(xi: int, yi: int):
     return x, y
 
 
-print('n_segments', n_segments)
-print('n_lines', n_lines)
-
-for yi in range(n_lines):
-    for xi in range(n_segments):
-        scaled_pixel = 1 - im.getpixel((xi, yi)) / 255.0
+for yi in range(n_pixels):
+    for xi in range(n_pixels):
         x, y = image_to_gcode_coordinates(xi, yi)
-        y -= line_height / 2
 
-        y_offset = scaled_pixel * line_height / 2
+        y_offset = pixel_size / 2 - 1  # padding
         if xi % 2 == 1:
             y_offset *= -1
 
-        kinematics.move(x, y + y_offset)
+        scaled_pixel = 1 - im.getpixel((xi, yi)) / 255.0
+        num_pixel_waves = int(scaled_pixel * max_pixel_lines)
+        if num_pixel_waves == 0:
+            x, y = image_to_gcode_coordinates(xi + 1, yi)
+            kinematics.move(x, y)
+            continue
+        pixel_wave_width = pixel_size / num_pixel_waves
+
+        for i in range(num_pixel_waves):
+            kinematics.move(x, y + y_offset)
+            kinematics.move(x + pixel_wave_width, y + y_offset)
+            y_offset *= -1
+            x += pixel_wave_width
+
+        x, y = image_to_gcode_coordinates(xi + 1, yi)
+        kinematics.move(x, y)
+
     # move around the border to the next line
     x, y = image_to_gcode_coordinates(image_width, yi)
     kinematics.move(r, y)  # A on current line
@@ -90,4 +100,4 @@ for yi in range(n_lines):
     kinematics.move(-r, r)  # C
     kinematics.move(*image_to_gcode_coordinates(0, yi + 1))  # C on next line
 
-kinematics.to_file("image_to_waves.g")
+kinematics.to_file("cartesian_sandy_noble.g")

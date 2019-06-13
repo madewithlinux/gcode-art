@@ -6,7 +6,7 @@ from PIL import ImageDraw
 class ImageKinematics(Kinematics):
     """writes to an image"""
 
-    def __init__(self, delegate, image_size, print_area_size):
+    def __init__(self, delegate: Kinematics, image_size: float, print_area_size: float):
         self.delegate = delegate
         self.image_size = image_size
         self.position = (0, 0)
@@ -40,7 +40,7 @@ class ImageKinematics(Kinematics):
 
     @property
     def gcode(self):
-        return self.delegate
+        return self.delegate.gcode
 
     def to_file(self, filename):
         """additionally writes image file to filename.png"""
