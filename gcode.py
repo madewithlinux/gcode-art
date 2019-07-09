@@ -46,10 +46,12 @@ class PolargraphKinematics(Kinematics):
                  *,
                  top_clip_distance: int,
                  wire_length: int,
-                 max_feedrate: int):
+                 max_feedrate: int,
+                 max_acceleration: int):
         self.top_clip_distance = top_clip_distance
         self.wire_length = wire_length
         self.max_feedrate = max_feedrate
+        self.max_acceleration = max_acceleration # 200 is good?
 
         self.anchor_A_x = -top_clip_distance / 2
         self.anchor_B_x = top_clip_distance / 2
@@ -60,8 +62,10 @@ class PolargraphKinematics(Kinematics):
         self.split_threshold = 5  # mm
 
         self._gcode = [
-            "G28.3 ; set current position to 0,0",
-            "G90   ; absolute mode",
+            "G92 X0 Y0 ; set current position to 0,0",
+            "G90       ; absolute mode",
+            "M211 S0   ; disable software endstops (to allow negative axis moves)",
+            f"M201 X{max_acceleration} Y{max_acceleration}  ; max acceleration",
             f"M203 X{max_feedrate} Y{max_feedrate}",
         ]
 
@@ -73,7 +77,7 @@ class PolargraphKinematics(Kinematics):
         # TODO split long moves!
         a = self.wire_length - dist(self.anchor_A_x, self.anchor_A_y, x, y)
         b = self.wire_length - dist(self.anchor_B_x, self.anchor_B_y, x, y)
-        self._gcode.append(f"G1 X{a} Y{b}")
+        self._gcode.append(f"G1 X{a} Y{b} F{self.max_feedrate}")
 
     def move(self, x, y):
         # plan out a spaced out list of points along our route to visit
