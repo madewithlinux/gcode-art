@@ -10,14 +10,15 @@ from image_kinematics import ImageKinematics
 
 # r = 260
 line_height = 16  # mm
-r = line_height * 20.5
+r = line_height * 23.5
 line_segment_length = 3  # mm
 print(f"r: {r}")
+print(f"2*r: {2*r}")
 
 kinematics = ImageKinematics(
     PolargraphKinematics(
         top_clip_distance=1350,
-        wire_length=800,
+        wire_length=900,
         max_feedrate=5000,
         max_acceleration=25,
     ),
@@ -43,7 +44,7 @@ kinematics.move(r, -r)  # E
 kinematics.move(r, r)  # B
 kinematics.move(-r, r)  # C
 
-filename = 'logo.jpg'
+filename = 'AppKit_img.jpg'
 im: Image = Image.open(filename)
 print('image size: ' + str(im.size))
 

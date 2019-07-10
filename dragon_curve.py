@@ -1,13 +1,22 @@
 #!/usr/bin/env python3
 
 from gcode import Turtle, PolargraphKinematics
+from image_kinematics import ImageKinematics
 
 t = Turtle(
+    # PolargraphKinematics(
+    #     top_clip_distance=870,
+    #     wire_length=630,
+    #     max_feedrate=600,
+    # )
+    ImageKinematics(
     PolargraphKinematics(
-        top_clip_distance=870,
-        wire_length=630,
-        max_feedrate=600,
-    )
+        top_clip_distance=1350,
+        wire_length=900,
+        max_feedrate=5000,
+        max_acceleration=25,
+    ),
+    1080, 600)
 )
 
 
@@ -26,17 +35,18 @@ def dragonCurveRecursive(order, length, sign):
         dragonCurveRecursive(order - 1, length * rootHalf, -1)
 
 
-t.move_to(-100, 0)
+# t.move_to(-100, 0)
+# t.set_angle(0)
+# dragonCurve(4, 200)
+# t.move_to(-100, 0)
+# t.set_angle(0)
+# dragonCurve(5, 200)
+t.move_to(-300, 0)
 t.set_angle(0)
-dragonCurve(4, 200)
-t.move_to(-100, 0)
-t.set_angle(0)
-dragonCurve(5, 200)
-t.move_to(-100, 0)
-t.set_angle(0)
-dragonCurve(6, 200)
-t.move_to(0, 0)
-t.set_angle(0)
+dragonCurve(10, 600)
+# t.move_to(0, 0)
+# t.set_angle(0)
 
 
-t.kinematics.print_gcode()
+# t.kinematics.print_gcode()
+t.kinematics.to_file("dragon_curve.g")
