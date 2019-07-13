@@ -17,7 +17,7 @@ print(f"2*r: {2*r}")
 
 kinematics = ImageKinematics(
     PolargraphKinematics(
-        top_clip_distance=1350,
+        top_clip_distance=1380,
         wire_length=900,
         max_feedrate=5000,
         max_acceleration=25,
@@ -44,7 +44,7 @@ kinematics.move(r, -r)  # E
 kinematics.move(r, r)  # B
 kinematics.move(-r, r)  # C
 
-filename = 'AppKit_img.jpg'
+filename = 'data.jpg'
 im: Image = Image.open(filename)
 print('image size: ' + str(im.size))
 

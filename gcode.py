@@ -65,7 +65,7 @@ class PolargraphKinematics(Kinematics):
             "G92 X0 Y0 ; set current position to 0,0",
             "G90       ; absolute mode",
             "M211 S0   ; disable software endstops (to allow negative axis moves)",
-            "M205 X1 Y1   ; max marlin-jerk",
+            "M205 X2 Y2   ; max marlin-jerk",
             f"M201 X{max_acceleration} Y{max_acceleration}  ; max acceleration",
             f"M203 X{max_feedrate} Y{max_feedrate}",
         ]

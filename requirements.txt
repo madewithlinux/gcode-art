@@ -8,9 +8,11 @@ parso==0.4.0
 pexpect==4.7.0
 pickleshare==0.7.5
 Pillow==6.0.0
+pkg-resources==0.0.0
 prompt-toolkit==2.0.9
 ptyprocess==0.6.0
 Pygments==2.4.2
+pypotrace==0.1.4
 six==1.12.0
 traitlets==4.3.2
 wcwidth==0.1.7
