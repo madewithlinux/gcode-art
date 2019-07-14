@@ -20,6 +20,10 @@ class ImageKinematics(Kinematics):
         self.lines.append((self.position, (x, y)))
         self.position = (x, y)
 
+    def travel(self, x, y):
+        self.delegate.travel(x, y)
+        self.position = (x, y)
+
     def point_to_image_coordinates(self, p):
         """assumes origin is in the middle"""
         drawing_area_r = (self.image_size - self.border) / 2

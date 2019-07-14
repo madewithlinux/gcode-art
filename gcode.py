@@ -15,6 +15,10 @@ class Kinematics(metaclass=ABCMeta):
     def move(self, x: float, y: float):
         pass
 
+    @abstractmethod
+    def travel(self, x: float, y: float):
+        pass
+
     @property
     @abstractmethod
     def gcode(self) -> [str]:
@@ -35,6 +39,11 @@ class CartesianKinematics(Kinematics):
 
     def move(self, x, y):
         self._gcode.append(f'G1 X{x} Y{y}')
+
+    def travel(self, x, y):
+        # TODO: pen up
+        self._gcode.append(f'G0 X{x} Y{y}')
+        # TODO: pen down
 
     @property
     def gcode(self):
@@ -75,7 +84,6 @@ class PolargraphKinematics(Kinematics):
         return self._gcode
 
     def _move_internal(self, x, y):
-        # TODO split long moves!
         a = self.wire_length - dist(self.anchor_A_x, self.anchor_A_y, x, y)
         b = self.wire_length - dist(self.anchor_B_x, self.anchor_B_y, x, y)
         self._gcode.append(f"G1 X{a} Y{b} F{self.max_feedrate}")
@@ -94,6 +102,11 @@ class PolargraphKinematics(Kinematics):
         # finally, explicitly move to where we were told to go
         self._move_internal(x, y)
         self.current_position = (x, y)
+
+    def travel(self, x, y):
+        # TODO: pen up
+        self.move(x, y)
+        # TODO: pen down
 
 
 class Turtle:
