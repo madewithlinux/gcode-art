@@ -1,40 +1,12 @@
 from PIL import Image
-from PIL import ImageOps
-from PIL import ImageFilter
-from PIL import ImageDraw
 from PIL import ImageColor
-
-im: Image = Image.open('logo.jpg')
-
-
-def unique_pixels(image):
-    pixels = set()
-    w, h = im.size
-    for x in range(w):
-        for y in range(h):
-            pixels.add(image.getpixel((x, y)))
-    return pixels
+from PIL import ImageFilter
 
 
-# print(unique_pixels(im))
-
-im2 = im.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=2)
-im2.save("logo2.png", "PNG")
-
-im2_edges = im2.convert('RGB').filter(ImageFilter.FIND_EDGES)
-im2_edges.save("logo_edges.png", "PNG")
-
-print(unique_pixels(im2_edges.convert('RGB')))
-
-im2_edges.convert('P', palette=Image.ADAPTIVE, colors=2).save("logo_edges2.png", "PNG")
-print(unique_pixels(im2_edges.convert('P', palette=Image.ADAPTIVE, colors=2)))
-
-
-def trace_image_dfs(image: Image):
-    import sys
-    sys.setrecursionlimit(4096)
-    """first, make sure to make the image in very few colors to prevent antialising"""
-    image = image.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=2)
+def trace_image_dfs(image: Image, num_colors=2):
+    im2 = image.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=num_colors)
+    im2_edges = im2.convert('RGB').filter(ImageFilter.FIND_EDGES)
+    image = im2_edges.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=2)
 
     line_color = 0
     w, h = image.size
@@ -113,8 +85,10 @@ def hsv_paths(paths: list, size, filename: str) -> Image:
     im.save(filename)
 
 
-paths = trace_image_dfs(im2_edges)
-# print(paths)
-print(len(paths))
+if __name__ == '__main__':
+    im: Image = Image.open('logo.jpg')
 
-hsv_paths(paths, im2.size, "hsv_paths.png")
+    paths = trace_image_dfs(im)
+    print(len(paths))
+
+    hsv_paths(paths, im.size, "hsv_paths.png")
