@@ -10,7 +10,7 @@ class ImageKinematics(Kinematics):
         self.delegate = delegate
         self.image_size = image_size
         self.position = (0, 0)
-        self.linewidth = 2  # mm
+        self.linewidth = 1  # mm
         self.border = 20
         self.pixels_per_mm = int((self.image_size - 2 * self.border) / print_area_size)
         self.lines = []

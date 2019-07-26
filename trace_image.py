@@ -53,7 +53,7 @@ def potrace_image(input_filename, infill=True):
 r = 300
 kinematics = ImageKinematics(
     PolargraphKinematics(
-        top_clip_distance=1380,
+        top_clip_distance=1350,
         wire_length=900,
         max_feedrate=5000,
         max_acceleration=25,
