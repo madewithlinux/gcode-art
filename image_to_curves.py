@@ -2,6 +2,9 @@ from PIL import Image
 from PIL import ImageColor
 from PIL import ImageFilter
 
+from gcode import Turtle, PolargraphKinematics, NullKinematics
+from image_kinematics import ImageKinematics
+
 
 def trace_image_dfs(image: Image, num_colors=2):
     im2 = image.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=num_colors)
@@ -12,7 +15,7 @@ def trace_image_dfs(image: Image, num_colors=2):
     w, h = image.size
 
     # find and start from all starting points
-    w, h = im.size
+    w, h = image.size
 
     paths = []
     visited = set()
@@ -67,11 +70,98 @@ def trace_image_dfs(image: Image, num_colors=2):
             if image.getpixel(pixel) == line_color and pixel not in visited:
                 dfs(x, y, paths)
 
+    paths = optimize_paths(paths)
+
     # filter out single pixel paths
     return list(path for path in paths if len(path) > 1)
 
 
-def hsv_paths(paths: list, size, filename: str) -> Image:
+def optimize_paths(paths: list) -> list:
+    outpaths = []
+    for path in paths:
+        # sanity check: can't have a single point or empty path
+        if len(path) < 2:
+            continue
+
+        changed = True
+        while changed:
+            path, changed = compact_path_ommit_midpoints(path)
+
+        changed = True
+        while changed:
+            path, changed = compact_path_ommit_length_two(path)
+
+        outpaths.append(path)
+
+    return outpaths
+
+
+def compact_path_ommit_midpoints(path: list) -> (list, bool):
+    """
+    compact adjacent lines
+    returns new path
+    """
+    if len(path) <= 2:
+        # can't optimize a path with no midpoints
+        return path, False
+
+    outpath = []
+    changed = False
+    outpath.append(path[0])
+    for i in range(len(path) - 2):
+        a = path[i]
+        b = path[i + 1]
+        c = path[i + 2]
+        horizontal = a[0] == b[0] and b[0] == c[0]
+        vertical = a[1] == b[1] and b[1] == c[1]
+        if not (horizontal or vertical):
+            outpath.append(b)
+        else:
+            changed = True
+    outpath.append(path[-1])
+
+    return outpath, changed
+
+
+def compact_path_ommit_length_two(path: list) -> (list, bool):
+    """
+    removes length-two segments, averaging to middle, to
+    hopefully make curves
+    returns new path
+    """
+    if len(path) <= 2:
+        # can't optimize a path with no midpoints
+        return path, False
+    outpath = []
+    changed = False
+
+    i = 0
+    while i < len(path) - 1:
+
+        a = path[i]
+        b = path[i + 1]
+        # horizontal = a[0] == b[0]
+        # vertical = a[1] == b[1]
+        dist2 = (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2
+        if dist2 == 1:
+            c = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+            outpath.append(c)
+            i += 1
+        else:
+            outpath.append(a)
+
+        i += 1
+
+    # make sure we specifically preserve the begin and end points of this path
+    if path[0] != outpath[0]:
+        outpath = [path[0]] + outpath
+    if path[1] != outpath[1]:
+        outpath.append(path[-1])
+
+    return outpath, changed
+
+
+def hsv_paths(paths: list, size, filename: str):
     im = Image.new('RGB', size, (255, 255, 255))
     pixdata = im.load()
 
@@ -85,10 +175,53 @@ def hsv_paths(paths: list, size, filename: str) -> Image:
     im.save(filename)
 
 
+def image_vector_paths(paths: list, size, filename: str):
+    r = max(size) / 2
+
+    k = ImageKinematics(NullKinematics())
+    image_width, image_height = size
+
+    def image_to_gcode_coordinates(xi: int, yi: int):
+        x = float(xi)
+        y = float(yi)
+
+        x -= image_width / 2
+
+        y = image_height - y
+        y -= image_height / 2
+
+        return x, y
+
+    for path in paths:
+        k.travel(*image_to_gcode_coordinates(*path[0]))
+        for pt in path[1:]:
+            k.move(*image_to_gcode_coordinates(*pt))
+    k.to_file(filename)
+
+
+def image_trace_many_colors(filename):
+    foldername = filename + ".d"
+    import os
+    if not os.path.exists(foldername):
+        os.mkdir(foldername)
+
+    im: Image = Image.open(filename)
+    # for i in range(2, 10):
+    for i in [5]:
+        paths = trace_image_dfs(im, num_colors=i)
+        filename = f"{foldername}/{i}.png"
+        hsv_paths(paths, im.size, filename)
+        image_vector_paths(paths, im.size, filename)
+        print(filename)
+
+
 if __name__ == '__main__':
-    im: Image = Image.open('logo.jpg')
-
-    paths = trace_image_dfs(im)
-    print(len(paths))
-
-    hsv_paths(paths, im.size, "hsv_paths.png")
+    # im: Image = Image.open('logo.jpg')
+    #
+    # paths = trace_image_dfs(im)
+    # print(len(paths))
+    #
+    # hsv_paths(paths, im.size, "hsv_paths.png")
+    image_trace_many_colors(
+        # filename="/home/j0sh/Documents/code/3d_printing/gcode_making_scripts/images/1-Bulbasaur.png")
+        filename="/home/j0sh/Documents/code/3d_printing/gcode_making_scripts/images/Bulbasaur.full.2136805.jpg")

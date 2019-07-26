@@ -33,6 +33,25 @@ class Kinematics(metaclass=ABCMeta):
             print(s)
 
 
+class NullKinematics(Kinematics):
+    def move(self, x: float, y: float):
+        pass
+
+    def travel(self, x: float, y: float):
+        pass
+
+    @property
+    def gcode(self) -> [str]:
+        return ["NullKinematics"]
+
+    def to_file(self, filename):
+        pass
+
+    def print_gcode(self):
+        for s in self.gcode:
+            print(s)
+
+
 class CartesianKinematics(Kinematics):
     def __init__(self):
         self._gcode = []
@@ -60,7 +79,7 @@ class PolargraphKinematics(Kinematics):
         self.top_clip_distance = top_clip_distance
         self.wire_length = wire_length
         self.max_feedrate = max_feedrate
-        self.max_acceleration = max_acceleration # 200 is good?
+        self.max_acceleration = max_acceleration  # 200 is good?
 
         self.anchor_A_x = -top_clip_distance / 2
         self.anchor_B_x = top_clip_distance / 2

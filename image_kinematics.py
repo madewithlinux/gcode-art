@@ -6,13 +6,12 @@ from PIL import ImageDraw
 class ImageKinematics(Kinematics):
     """writes to an image"""
 
-    def __init__(self, delegate: Kinematics, image_size: float, print_area_size: float):
+    def __init__(self, delegate: Kinematics, *, pixels_per_mm=4, line_thickness=2):
         self.delegate = delegate
-        self.image_size = image_size
         self.position = (0, 0)
-        self.linewidth = 2  # mm
+        self.linewidth = line_thickness  # mm
         self.border = 20
-        self.pixels_per_mm = int((self.image_size - 2 * self.border) / print_area_size)
+        self.pixels_per_mm = pixels_per_mm
         self.lines = []
 
     def move(self, x, y):
@@ -24,24 +23,6 @@ class ImageKinematics(Kinematics):
         self.delegate.travel(x, y)
         self.position = (x, y)
 
-    def point_to_image_coordinates(self, p):
-        """assumes origin is in the middle"""
-        drawing_area_r = (self.image_size - self.border) / 2
-        gcode_max = drawing_area_r / self.pixels_per_mm
-
-        x, y = p
-
-        x /= gcode_max
-        x *= drawing_area_r
-        x += self.image_size / 2
-
-        y /= gcode_max
-        y *= drawing_area_r
-        y += self.image_size / 2
-        y = self.image_size - y
-
-        return x, y
-
     @property
     def gcode(self):
         return self.delegate.gcode
@@ -51,10 +32,39 @@ class ImageKinematics(Kinematics):
         self.delegate.to_file(filename)
         filename += ".png"
         # TODO write to png file
-        im = Image.new('RGB', (self.image_size, self.image_size), (255, 255, 255))
+        size, image_lines = self.get_image_size_and_lines()
+        im = Image.new('RGB', size, (255, 255, 255))
         draw = ImageDraw.Draw(im)
-        for p0, p1 in self.lines:
-            p0 = self.point_to_image_coordinates(p0)
-            p1 = self.point_to_image_coordinates(p1)
+        for p0, p1 in image_lines:
             draw.line([p0, p1], fill=(0, 0, 0), width=self.linewidth * self.pixels_per_mm)
         im.save(filename)
+
+    def get_image_size_and_lines(self) -> ((int, int), list):
+        """assumes origin is in the middle"""
+
+        max_x = 0
+        min_x = 0
+        max_y = 0
+        min_y = 0
+        for line in self.lines:
+            for x, y in line:
+                max_x = max(max_x, x)
+                min_x = min(min_x, x)
+                max_y = max(max_y, y)
+                min_y = min(min_y, y)
+
+        range_x = max_x - min_x
+        range_y = max_y - min_y
+        image_w = self.pixels_per_mm * range_x
+        image_h = self.pixels_per_mm * range_y
+
+        def gcode_to_image_coordinates(p):
+            x, y = p
+            return ((x - min_x) / range_x * image_w,
+                    image_h - (y - min_y) / range_y * image_h,
+                    )
+
+        return ((int(image_w + self.border), int(image_h + self.border)), [(
+            gcode_to_image_coordinates(line[0]),
+            gcode_to_image_coordinates(line[1]),
+        ) for line in self.lines])
