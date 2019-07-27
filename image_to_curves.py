@@ -178,7 +178,7 @@ def hsv_paths(paths: list, size, filename: str):
 def image_vector_paths(paths: list, size, filename: str):
     r = max(size) / 2
 
-    k = ImageKinematics(NullKinematics())
+    k = ImageKinematics(NullKinematics(), pixels_per_mm=12)
     image_width, image_height = size
 
     def image_to_gcode_coordinates(xi: int, yi: int):

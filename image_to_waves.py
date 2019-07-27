@@ -9,9 +9,10 @@ from image_kinematics import ImageKinematics
 # TODO support non-square images to preserve aspect ratio
 
 # r = 260
-line_height = 16  # mm
+line_height = 12  # mm
 r = line_height * 23.5
-line_segment_length = 2  # mm
+line_segment_length = 1  # mm
+filename = 'images/1-Bulbasaur.png'
 print(f"r: {r}")
 print(f"2*r: {2*r}")
 
@@ -22,7 +23,9 @@ kinematics = ImageKinematics(
         max_feedrate=5000,
         max_acceleration=25,
     ),
-    1080, 2 * r)
+    pixels_per_mm=8,
+    line_thickness_mm=1.5,
+)
 
 ####
 n_lines = 2 * int(2 * r / line_height)
@@ -34,8 +37,8 @@ n_segments = int(2 * r / line_segment_length)
 # |   O---A
 # |       |
 # D-------E
-kinematics.move(0, 0)  # O
-kinematics.move(r, 0)  # A
+kinematics.travel(0, 0)  # O
+kinematics.travel(r, 0)  # A
 kinematics.move(r, r)  # B
 kinematics.move(-r, r)  # C
 kinematics.move(-r, -r)  # D
@@ -44,7 +47,6 @@ kinematics.move(r, -r)  # E
 kinematics.move(r, r)  # B
 kinematics.move(-r, r)  # C
 
-filename = 'images/001Bulbasaur.png'
 im: Image = Image.open(filename)
 print('image size: ' + str(im.size))
 
@@ -93,4 +95,4 @@ for yi in range(0, n_lines, 2):
     kinematics.move(-r, r)  # C
     kinematics.move(*image_to_gcode_coordinates(0, yi + 1))  # C on next line
 
-kinematics.to_file("image_to_waves.g")
+kinematics.to_file(f"{filename}.g")

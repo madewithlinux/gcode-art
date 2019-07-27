@@ -6,10 +6,10 @@ from PIL import ImageDraw
 class ImageKinematics(Kinematics):
     """writes to an image"""
 
-    def __init__(self, delegate: Kinematics, *, pixels_per_mm=4, line_thickness=2):
+    def __init__(self, delegate: Kinematics, *, pixels_per_mm=4, line_thickness_mm=2):
         self.delegate = delegate
         self.position = (0, 0)
-        self.linewidth = line_thickness  # mm
+        self.linewidth = line_thickness_mm  # mm
         self.border = 20
         self.pixels_per_mm = pixels_per_mm
         self.lines = []
@@ -35,8 +35,22 @@ class ImageKinematics(Kinematics):
         size, image_lines = self.get_image_size_and_lines()
         im = Image.new('RGB', size, (255, 255, 255))
         draw = ImageDraw.Draw(im)
+
+        draw_lines = [[]]
         for p0, p1 in image_lines:
-            draw.line([p0, p1], fill=(0, 0, 0), width=self.linewidth * self.pixels_per_mm)
+            if len(draw_lines[-1]) == 0:  # empty line
+                draw_lines[-1].append(p0)
+                draw_lines[-1].append(p1)
+            elif p0 == draw_lines[-1][-1]:  # continuation
+                draw_lines[-1].append(p1)
+            else:  # new line
+                draw_lines.append([p0, p1])
+        for line in draw_lines:
+            draw.line(line,
+                      fill=(0, 0, 0),
+                      width=int(self.linewidth * self.pixels_per_mm),
+                      joint="curve")
+
         im.save(filename)
 
     def get_image_size_and_lines(self) -> ((int, int), list):
