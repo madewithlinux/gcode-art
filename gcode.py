@@ -123,9 +123,17 @@ class PolargraphKinematics(Kinematics):
         self.current_position = (x, y)
 
     def travel(self, x, y):
-        # TODO: pen up
+        # self._gcode.append("M280 P0 S180")
+        self._gcode.append("G4 ; dwell before servo move")
+        for i in range(99,140,1):
+            f.write(f"M280 P0 S{i}\n")
+            f.write(f"G4 P5\n")
         self.move(x, y)
-        # TODO: pen down
+        # self._gcode.append("M280 P0 S100")
+        self._gcode.append("G4 ; dwell before servo move")
+        for i in range(140,99,-1):
+            f.write(f"M280 P0 S{i}\n")
+            f.write(f"G4 P5\n")
 
 
 class Turtle:
