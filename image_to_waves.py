@@ -12,7 +12,7 @@ from image_kinematics import ImageKinematics
 line_height = 12  # mm
 r = line_height * 23.5
 line_segment_length = 1  # mm
-filename = 'images/1-Bulbasaur.png'
+filename = 'images/001Bulbasaur.png'
 print(f"r: {r}")
 print(f"2*r: {2*r}")
 
@@ -23,8 +23,8 @@ kinematics = ImageKinematics(
         max_feedrate=5000,
         max_acceleration=25,
     ),
-    pixels_per_mm=8,
-    line_thickness_mm=1.5,
+    pixels_per_mm=2,
+    line_thickness_mm=1,
 )
 
 ####

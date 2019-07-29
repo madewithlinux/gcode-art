@@ -5,6 +5,8 @@ from PIL import ImageFilter
 from gcode import Turtle, PolargraphKinematics, NullKinematics
 from image_kinematics import ImageKinematics
 
+from coordinate_transformer import transformer_for_image_size_and_width
+
 
 def trace_image_dfs(image: Image, num_colors=2):
     im2 = image.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=num_colors)
@@ -178,25 +180,38 @@ def hsv_paths(paths: list, size, filename: str):
 def image_vector_paths(paths: list, size, filename: str):
     r = max(size) / 2
 
-    k = ImageKinematics(NullKinematics(), pixels_per_mm=12)
+    # k = ImageKinematics(NullKinematics(), pixels_per_mm=12)
+    k = ImageKinematics(
+        PolargraphKinematics(
+            top_clip_distance=1340,
+            wire_length=900,
+            max_feedrate=5000,
+            max_acceleration=25,
+        ),
+        pixels_per_mm=2,
+        line_thickness_mm=1,
+    )
     image_width, image_height = size
 
+    t = transformer_for_image_size_and_width(size, 564)
+
     def image_to_gcode_coordinates(xi: int, yi: int):
-        x = float(xi)
-        y = float(yi)
+        return t.image_to_gcode((xi, yi))
+        # x = float(xi)
+        # y = float(yi)
 
-        x -= image_width / 2
+        # x -= image_width / 2
 
-        y = image_height - y
-        y -= image_height / 2
+        # y = image_height - y
+        # y -= image_height / 2
 
-        return x, y
+        # return x, y
 
     for path in paths:
         k.travel(*image_to_gcode_coordinates(*path[0]))
         for pt in path[1:]:
             k.move(*image_to_gcode_coordinates(*pt))
-    k.to_file(filename)
+    k.to_file(filename + ".g")
 
 
 def image_trace_many_colors(filename):
@@ -206,8 +221,8 @@ def image_trace_many_colors(filename):
         os.mkdir(foldername)
 
     im: Image = Image.open(filename)
-    for i in range(2, 10):
-    # for i in [5]:
+    # for i in range(2, 10):
+    for i in [2]:
         paths = trace_image_dfs(im, num_colors=i)
         filename = f"{foldername}/{i}.png"
         hsv_paths(paths, im.size, filename)
@@ -224,4 +239,4 @@ if __name__ == '__main__':
     # hsv_paths(paths, im.size, "hsv_paths.png")
     image_trace_many_colors(
         # filename="/home/j0sh/Documents/code/3d_printing/gcode_making_scripts/images/1-Bulbasaur.png")
-        filename="images/bulbasaur lines.png")
+        filename="images/magikarp_fishbowl.png")
