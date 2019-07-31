@@ -239,4 +239,4 @@ if __name__ == '__main__':
     # hsv_paths(paths, im.size, "hsv_paths.png")
     image_trace_many_colors(
         # filename="/home/j0sh/Documents/code/3d_printing/gcode_making_scripts/images/1-Bulbasaur.png")
-        filename="images/magikarp_fishbowl.png")
+        filename="images/magikarp_fishbowl2.png")
