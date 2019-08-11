@@ -12,7 +12,8 @@ from image_kinematics import ImageKinematics
 line_height = 12  # mm
 r = line_height * 23.5
 line_segment_length = 1  # mm
-filename = 'images/001Bulbasaur.png'
+# filename = 'images/001Bulbasaur.png'
+filename = "images/IMG_0766.jpg"
 print(f"r: {r}")
 print(f"2*r: {2*r}")
 
