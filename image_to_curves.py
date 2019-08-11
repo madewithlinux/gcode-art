@@ -34,21 +34,20 @@ def trace_image_dfs(image: Image, num_colors=2):
                     continue
                 if x == x0 and y == y0:  # skip self
                     continue
-                if (x, y) in m_visited:  # skip visited
+                if pixel in m_visited:  # skip visited
                     continue
                 if image.getpixel(pixel) != line_color:  # skip other color
                     continue
 
                 adjacent.append(pixel)
 
-        # prefer closest by absolute distance
-        adjacent.sort(key=lambda p: (p[0] - x0) ** 2 + (p[1] - y0) ** 2)
-
         if len(adjacent) == 0:
             return None
         elif len(adjacent) == 1:
             return adjacent[0]
         else:
+            # prefer closest by absolute distance
+            adjacent.sort(key=lambda p: (p[0] - x0) ** 2 + (p[1] - y0) ** 2)
             m_stack += adjacent[1:]
             return adjacent[0]
 
@@ -157,7 +156,7 @@ def compact_path_ommit_length_two(path: list) -> (list, bool):
     # make sure we specifically preserve the begin and end points of this path
     if path[0] != outpath[0]:
         outpath = [path[0]] + outpath
-    if path[1] != outpath[1]:
+    if path[-1] != outpath[-1]:
         outpath.append(path[-1])
 
     return outpath, changed

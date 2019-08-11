@@ -2,6 +2,9 @@ from gcode import Kinematics
 from PIL import Image
 from PIL import ImageDraw
 
+import svgwrite
+from svgwrite import mm
+
 
 class ImageKinematics(Kinematics):
     """writes to an image"""
@@ -30,9 +33,24 @@ class ImageKinematics(Kinematics):
     def to_file(self, filename):
         """additionally writes image file to filename.png"""
         self.delegate.to_file(filename)
-        filename += ".png"
-        # TODO write to png file
         size, image_lines = self.get_image_size_and_lines()
+
+        dwg = svgwrite.Drawing(filename=f"{filename}.svg", debug=False)
+        dwg.add(dwg.rect(
+            size=(size[0]*mm, size[1]*mm),
+            stroke='white',
+            fill='white',
+        ))
+        for line in image_lines:
+            dwg.add(dwg.line(
+                start=(line[0][0]*mm, line[0][1]*mm),
+                end=(line[1][0]*mm, line[1][1]*mm),
+                stroke='black',
+                stroke_width=4,
+            ))
+        dwg.save()
+
+
         im = Image.new('RGB', size, (255, 255, 255))
         draw = ImageDraw.Draw(im)
 
@@ -51,7 +69,7 @@ class ImageKinematics(Kinematics):
                       width=int(self.linewidth * self.pixels_per_mm),
                       joint="curve")
 
-        im.save(filename)
+        im.save(f"{filename}.png")
 
     def get_image_size_and_lines(self) -> ((int, int), list):
         """assumes origin is in the middle"""
