@@ -220,7 +220,7 @@ def image_trace_many_colors(filename):
         os.mkdir(foldername)
 
     im: Image = Image.open(filename)
-    for i in range(2, 10):
+    for i in range(2, 5):
     # for i in [2]:
         paths = trace_image_dfs(im, num_colors=i)
         filename = f"{foldername}/{i}.png"
@@ -238,4 +238,4 @@ if __name__ == '__main__':
     # hsv_paths(paths, im.size, "hsv_paths.png")
     image_trace_many_colors(
         # filename="/home/j0sh/Documents/code/3d_printing/gcode_making_scripts/images/1-Bulbasaur.png")
-        filename="images/IMG_0766.jpg")
+        filename="images/001Bulbasaur.png")
