@@ -2,7 +2,7 @@ from PIL import Image
 from PIL import ImageColor
 from PIL import ImageFilter
 
-from gcode import Turtle, PolargraphKinematics, NullKinematics
+from gcode import PolargraphKinematics, NullKinematics
 from image_kinematics import ImageKinematics
 
 from coordinate_transformer import transformer_for_image_size_and_width
@@ -14,7 +14,11 @@ def trace_image_dfs(image: Image, num_colors=2, find_edges=True):
         im2_edges = im2.convert('RGB').filter(ImageFilter.FIND_EDGES)
     else:
         im2_edges = im2
-    image = im2_edges.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=2)
+    image: Image = im2_edges.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=2)
+    # crop out the border that was added by the edge detection
+    sz = image.size
+    image = image.crop((1,1,sz[0]-1,sz[1]-1))
+
 
     line_color = 0
     w, h = image.size
@@ -241,4 +245,4 @@ if __name__ == '__main__':
     # hsv_paths(paths, im.size, "hsv_paths.png")
     image_trace_many_colors(
         # filename="/home/j0sh/Documents/code/3d_printing/gcode_making_scripts/images/1-Bulbasaur.png")
-        filename="images/001Bulbasaur.png")
+        filename="images/Bulbasaur.png")
