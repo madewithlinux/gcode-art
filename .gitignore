@@ -1,0 +1,6 @@
+images/
+*.g
+bin/
+lib/
+lib64/
+share/

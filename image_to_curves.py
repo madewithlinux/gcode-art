@@ -8,9 +8,12 @@ from image_kinematics import ImageKinematics
 from coordinate_transformer import transformer_for_image_size_and_width
 
 
-def trace_image_dfs(image: Image, num_colors=2):
+def trace_image_dfs(image: Image, num_colors=2, find_edges=True):
     im2 = image.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=num_colors)
-    im2_edges = im2.convert('RGB').filter(ImageFilter.FIND_EDGES)
+    if find_edges:
+        im2_edges = im2.convert('RGB').filter(ImageFilter.FIND_EDGES)
+    else:
+        im2_edges = im2
     image = im2_edges.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=2)
 
     line_color = 0
@@ -213,7 +216,7 @@ def image_vector_paths(paths: list, size, filename: str):
     k.to_file(filename + ".g")
 
 
-def image_trace_many_colors(filename):
+def image_trace_many_colors(filename, find_edges=True):
     foldername = filename + ".d"
     import os
     if not os.path.exists(foldername):
@@ -222,7 +225,7 @@ def image_trace_many_colors(filename):
     im: Image = Image.open(filename)
     # for i in range(2, 10):
     for i in [2]:
-        paths = trace_image_dfs(im, num_colors=i)
+        paths = trace_image_dfs(im, num_colors=i, find_edges=find_edges)
         filename = f"{foldername}/{i}.png"
         hsv_paths(paths, im.size, filename)
         image_vector_paths(paths, im.size, filename)
@@ -238,4 +241,8 @@ if __name__ == '__main__':
     # hsv_paths(paths, im.size, "hsv_paths.png")
     image_trace_many_colors(
         # filename="/home/j0sh/Documents/code/3d_printing/gcode_making_scripts/images/1-Bulbasaur.png")
-        filename="images/magikarp_fishbowl2.png")
+        # filename="images/magikarp_fishbowl2.png",
+        # find_edges=True,
+        filename="images/magikarp_fishbowl2.png",
+        find_edges=False,
+    )
